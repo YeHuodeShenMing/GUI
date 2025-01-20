@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>597</width>
-    <height>500</height>
+    <width>1205</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>10</y>
-     <width>561</width>
-     <height>461</height>
+     <x>250</x>
+     <y>-50</y>
+     <width>1221</width>
+     <height>651</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -27,18 +27,18 @@
 background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
+    <enum>QFrame::Shape::StyledPanel</enum>
    </property>
    <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
+    <enum>QFrame::Shadow::Raised</enum>
    </property>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>20</y>
-      <width>221</width>
-      <height>21</height>
+      <x>340</x>
+      <y>30</y>
+      <width>581</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -51,17 +51,17 @@ background-color: rgb(255, 255, 255);</string>
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>260</x>
       <y>400</y>
-      <width>361</width>
-      <height>51</height>
+      <width>681</width>
+      <height>181</height>
      </rect>
     </property>
     <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
+     <enum>QFrame::Shape::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
+     <enum>QFrame::Shadow::Raised</enum>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -87,30 +87,37 @@ background-color: rgb(255, 255, 255);</string>
      <item>
       <widget class="QPushButton" name="pushButton">
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(209, 209, 209);</string>
+        <string notr="true">background-color: rgb(209, 209, 209);
+color: rgb(255, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Quit</string>
+        <string>Exit</string>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>300</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>80</y>
-      <width>461</width>
-      <height>301</height>
+      <x>140</x>
+      <y>270</y>
+      <width>191</width>
+      <height>31</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 127);
-background-image: url(:/image/facial_recognation.jpg);</string>
-    </property>
     <property name="text">
-     <string/>
+     <string>Enter Student ID:</string>
     </property>
    </widget>
   </widget>

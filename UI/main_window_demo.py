@@ -6,15 +6,16 @@ import cv2
 import sys
 import main_window_ui
 import sqlite3
-import os  # 用于检查文件路径
+import os
 
 class UI_main(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = main_window_ui.Ui_MainWindow()
+        self.ui = main_window_ui.Ui_StudentFaceRecorder()
         self.ui.setupUi(self)
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setWindowTitle("Student Face Recorder")
+        # self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
         # 初始化摄像头和视频流
         self.cap = None
@@ -26,10 +27,9 @@ class UI_main(QMainWindow):
         self.auto_stop_timer = None
         self.video_writer = None
 
-
         # 初始化进度条
-        self.progress_bar = QtWidgets.QProgressBar(self.ui.frame)
-        self.progress_bar.setGeometry(QtCore.QRect(340, 50, 581, 20))
+        self.progress_bar = QtWidgets.QProgressBar(self.ui.centralwidget)
+        self.progress_bar.setGeometry(QtCore.QRect(100, 400, 600, 20))
         self.progress_bar.setMaximum(self.max_recording_time)  # 设置最大值为录制时间
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(False)
@@ -40,13 +40,16 @@ class UI_main(QMainWindow):
         self.ui.pushButton.clicked.connect(self.exit)              # 退出
 
         # 初始化视频显示区域
-        self.video_label = QLabel(self.ui.frame)
-        self.video_label.setGeometry(QtCore.QRect(190, 70, 901, 441))
+        self.video_label = QLabel(self.ui.centralwidget)
+        self.video_label.setGeometry(QtCore.QRect(100, 100, 600, 300))
         self.video_label.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.video_label.setAlignment(Qt.AlignCenter)
 
         # 初始化拖动标志
         self.m_flag = False
+
+        # 获取学生 ID 输入框
+        self.student_id_input = self.ui.lineEdit
 
         self.show()
 
@@ -68,7 +71,9 @@ class UI_main(QMainWindow):
 
         # 配置视频写入器
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self.video_writer = cv2.VideoWriter(f'{student_id}.avi', fourcc, 20.0, (width, height))
+        video_file_path = os.path.join("video", f'{student_id}.avi')  # 保存到 video 文件夹
+        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
+        self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
 
         if not self.video_writer.isOpened():
             QMessageBox.critical(self, "Error", "Failed to create video writer")
@@ -104,7 +109,8 @@ class UI_main(QMainWindow):
 
             # 保存记录到数据库
             student_id = self.student_id_input.text().strip()
-            self.save_to_db(student_id, f'{student_id}.avi')
+            video_file_path = os.path.join("video", f'{student_id}.avi')
+            self.save_to_db(student_id, video_file_path)
 
     # 更新视频帧
     def update_frame(self):

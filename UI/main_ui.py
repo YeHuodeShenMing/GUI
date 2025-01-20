@@ -14,20 +14,22 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(597, 500)
+        Form.resize(1205, 616)
         self.frame = QtWidgets.QFrame(Form)
-        self.frame.setGeometry(QtCore.QRect(20, 10, 561, 461))
+        self.frame.setGeometry(QtCore.QRect(250, -50, 1221, 651))
         self.frame.setStyleSheet("background-color: rgb(0, 0, 0);\n"
 "background-color: rgb(255, 255, 255);")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+
+
         self.frame.setObjectName("frame")
         self.label = QtWidgets.QLabel(self.frame)
-        self.label.setGeometry(QtCore.QRect(160, 20, 221, 21))
+        self.label.setGeometry(QtCore.QRect(340, 30, 581, 41))
         self.label.setStyleSheet("background-color: rgb(209, 209, 209);")
         self.label.setObjectName("label")
         self.frame_2 = QtWidgets.QFrame(self.frame)
-        self.frame_2.setGeometry(QtCore.QRect(90, 400, 361, 51))
+        self.frame_2.setGeometry(QtCore.QRect(260, 400, 681, 181))
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
@@ -42,14 +44,15 @@ class Ui_Form(object):
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout.addWidget(self.pushButton_2)
         self.pushButton = QtWidgets.QPushButton(self.frame_2)
-        self.pushButton.setStyleSheet("background-color: rgb(209, 209, 209);")
+        self.pushButton.setStyleSheet("background-color: rgb(209, 209, 209);\n"
+"color: rgb(255, 0, 0);")
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
+        self.lineEdit = QtWidgets.QLineEdit(self.frame)
+        self.lineEdit.setGeometry(QtCore.QRect(140, 300, 111, 19))
+        self.lineEdit.setObjectName("lineEdit")
         self.label_2 = QtWidgets.QLabel(self.frame)
-        self.label_2.setGeometry(QtCore.QRect(50, 80, 461, 301))
-        self.label_2.setStyleSheet("background-color: rgb(255, 255, 127);\n"
-"background-image: url(:/image/facial_recognation.jpg);")
-        self.label_2.setText("")
+        self.label_2.setGeometry(QtCore.QRect(140, 280, 81, 21))
         self.label_2.setObjectName("label_2")
 
         self.retranslateUi(Form)
@@ -61,5 +64,6 @@ class Ui_Form(object):
         self.label.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt;\">recognition system</span></p></body></html>"))
         self.pushButton_3.setText(_translate("Form", "Start"))
         self.pushButton_2.setText(_translate("Form", "Stop"))
-        self.pushButton.setText(_translate("Form", "Quit"))
+        self.pushButton.setText(_translate("Form", "Exit"))
+        self.label_2.setText(_translate("Form", "Enter Student ID:"))
 import image_rc
