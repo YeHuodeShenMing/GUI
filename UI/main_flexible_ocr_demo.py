@@ -39,8 +39,7 @@ class UI_main(QMainWindow):
         self.video_writer = None
 
         # 初始化进度条
-        self.progress_bar = QtWidgets.QProgressBar(self.ui.centralwidget)
-        self.progress_bar.setGeometry(QtCore.QRect(100, 400, 600, 20))
+        self.progress_bar = self.ui.progressBar
         self.progress_bar.setMaximum(self.max_recording_time)  # 设置最大值为录制时间
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(False)
@@ -51,10 +50,6 @@ class UI_main(QMainWindow):
         self.ui.pushButton.clicked.connect(self.exit)              # 退出
 
         # 初始化视频显示区域
-
-        # self.video_label = QLabel(self.ui.centralwidget)
-        # self.video_label.setGeometry(QtCore.QRect(100, 100, 600, 300))
-        # self.video_label.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.ui.video_label.setAlignment(Qt.AlignCenter)
 
         # 初始化拖动标志
@@ -71,15 +66,10 @@ class UI_main(QMainWindow):
         # 重新点击start按钮时，隐藏Label_2
         self.hide_label_2()
 
-        # if not student_id:
-        #     QMessageBox.warning(self, "Warning", "Please enter a valid Student ID")
-        #     return
-
-
 
         # 初始化摄像头
-        self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
-        # self.cap = cv2.VideoCapture(0)
+        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
+        self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             QMessageBox.critical(self, "Error", "Unable to access the camera")
             return
@@ -153,7 +143,6 @@ class UI_main(QMainWindow):
                 self.video_writer.release()
                 self.video_writer = None
             self.recording = False
-            self.progress_bar.setVisible(False)
 
             # 确保进度条达到100%
             self.progress_bar.setValue(self.max_recording_time)
