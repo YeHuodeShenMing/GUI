@@ -4,9 +4,11 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer, Qt
 import cv2
 import sys
-import main_window_ui
 import sqlite3
 import os
+import main_window_ui
+import pytz
+from datetime import datetime
 
 class UI_main(QMainWindow):
     def __init__(self):
@@ -14,8 +16,8 @@ class UI_main(QMainWindow):
         self.ui = main_window_ui.Ui_StudentFaceRecorder()
         self.ui.setupUi(self)
         self.setWindowTitle("Student Face Recorder")
-        # self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+
 
         # 初始化摄像头和视频流
         self.cap = None
@@ -60,7 +62,33 @@ class UI_main(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please enter a valid Student ID")
             return
 
-        self.cap = cv2.VideoCapture(0)
+        # 检查数据库中是否已存在该学生ID的记录
+        conn = sqlite3.connect("students.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS student_faces (
+                student_id TEXT PRIMARY KEY,
+                video_path TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        cursor.execute("SELECT * FROM student_faces WHERE student_id = ?", (student_id,))
+        if cursor.fetchone():
+            reply = QMessageBox.question(
+                self,
+                "Record Exists",
+                "This student ID already exists. Do you want to overwrite the existing record?",
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if reply == QMessageBox.No:
+                conn.close()
+                return
+        conn.close()
+
+        # 初始化摄像头
+        self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
         if not self.cap.isOpened():
             QMessageBox.critical(self, "Error", "Unable to access the camera")
             return
@@ -144,11 +172,61 @@ class UI_main(QMainWindow):
         conn = sqlite3.connect("students.db")
         cursor = conn.cursor()
         cursor.execute(
-            "CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, video_path TEXT)"
+            """
+            CREATE TABLE IF NOT EXISTS student_faces (
+                student_id TEXT PRIMARY KEY,
+                video_path TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
         )
-        cursor.execute("INSERT INTO students (student_id, video_path) VALUES (?, ?)", (student_id, file_path))
-        conn.commit()
-        conn.close()
+        try:
+            cursor.execute(
+                "INSERT OR REPLACE INTO student_faces (student_id, video_path) VALUES (?, ?)",
+                (student_id, file_path),
+            )
+            conn.commit()
+            QMessageBox.information(self, "Success", "Record saved successfully!")
+        except sqlite3.Error as e:
+            QMessageBox.critical(self, "Error", f"Failed to save to database: {e}")
+        finally:
+            conn.close()
+
+
+
+    def save_to_db(self, student_id, file_path):
+        try:
+            # 获取当前本地时间（以指定时区，例如 'Asia/Shanghai'）
+            local_tz = pytz.timezone('Asia/Dubai')  # 根据所在地调整时区
+            local_time = datetime.now(local_tz)
+
+            conn = sqlite3.connect("students.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS student_faces (
+                    student_id TEXT PRIMARY KEY,
+                    video_path TEXT,
+                    timestamp DATETIME
+                )
+                """
+            )
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO student_faces (student_id, video_path, timestamp)
+                VALUES (?, ?, ?)
+                """,
+                (student_id, file_path, local_time.strftime("%Y-%m-%d %H:%M:%S"))
+            )
+            conn.commit()
+            conn.close()
+
+            print(f"Record saved: {student_id}, {file_path}, {local_time}")
+            QMessageBox.information(self, "Success", "Record saved successfully!")
+        except sqlite3.Error as e:
+            QMessageBox.critical(self, "Error", f"Failed to save to database: {e}")
+        finally:
+            conn.close()
 
     # 拖动窗口
     def mousePressEvent(self, event):
@@ -167,9 +245,18 @@ class UI_main(QMainWindow):
         self.m_flag = False
         self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
 
-
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    win = UI_main()
-    win.show()
-    sys.exit(app.exec_())
+    try:
+        app = QApplication(sys.argv)
+        win = UI_main()
+        win.show()
+        sys.exit(app.exec_())
+    except Exception as e:
+        QMessageBox.critical(None, "Critical Error", f"An unexpected error occurred: {e}")
+
+
+"""
+1. Lets make the form more flexible (maximizable and minimizable)
+2. Lets make the start button add one more functionality (let embed OCR model to extract the students ID and automatically save the video using the ID_timestamp)
+3. Lets put the messages using green label on top of the frame
+"""

@@ -13,6 +13,7 @@ import imutils
 import easyocr
 import numpy as np
 import matplotlib.pyplot as plt
+import video
 
 class UI_main(QMainWindow):
     def __init__(self):
@@ -50,10 +51,11 @@ class UI_main(QMainWindow):
         self.ui.pushButton.clicked.connect(self.exit)              # 退出
 
         # 初始化视频显示区域
-        self.video_label = QLabel(self.ui.centralwidget)
-        self.video_label.setGeometry(QtCore.QRect(100, 100, 600, 300))
-        self.video_label.setStyleSheet("background-color: rgb(0, 0, 0);")
-        self.video_label.setAlignment(Qt.AlignCenter)
+
+        # self.video_label = QLabel(self.ui.centralwidget)
+        # self.video_label.setGeometry(QtCore.QRect(100, 100, 600, 300))
+        # self.video_label.setStyleSheet("background-color: rgb(0, 0, 0);")
+        self.ui.video_label.setAlignment(Qt.AlignCenter)
 
         # 初始化拖动标志
         self.m_flag = False
@@ -69,10 +71,50 @@ class UI_main(QMainWindow):
         # 重新点击start按钮时，隐藏Label_2
         self.hide_label_2()
 
-        if not student_id:
-            QMessageBox.warning(self, "Warning", "Please enter a valid Student ID")
+        # if not student_id:
+        #     QMessageBox.warning(self, "Warning", "Please enter a valid Student ID")
+        #     return
+
+
+
+        # 初始化摄像头
+        self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
+        # self.cap = cv2.VideoCapture(0)
+        if not self.cap.isOpened():
+            QMessageBox.critical(self, "Error", "Unable to access the camera")
             return
 
+        # 获取摄像头的分辨率
+        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        # 在视频采集完第一帧并识别完后
+        self.exam_student_ID(student_id)
+
+        # 配置视频写入器
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        video_file_path = os.path.join("video", f'{student_id}.avi')  # 保存到 video 文件夹
+        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
+        self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
+
+        if not self.video_writer.isOpened():
+            QMessageBox.critical(self, "Error", "Failed to create video writer")
+            return
+
+        self.timer.start(30)  # 设置定时器，每30ms更新一帧
+        self.recording = True
+        self.recording_time = 0
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(0)
+        print("Recording started")
+
+        # 设置自动停止定时器
+        self.auto_stop_timer = QTimer()
+        self.auto_stop_timer.timeout.connect(self.stop_recording)
+        self.auto_stop_timer.start(self.max_recording_time)
+
+    # 检查Student ID 是否在库中
+    def exam_student_ID(self, student_id):
         # 检查数据库中是否已存在该学生ID的记录
         conn = sqlite3.connect("students.db")
         cursor = conn.cursor()
@@ -97,39 +139,6 @@ class UI_main(QMainWindow):
                 conn.close()
                 return
         conn.close()
-
-        # 初始化摄像头
-        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
-        self.cap = cv2.VideoCapture(0)
-        if not self.cap.isOpened():
-            QMessageBox.critical(self, "Error", "Unable to access the camera")
-            return
-
-        # 获取摄像头的分辨率
-        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        # 配置视频写入器
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        video_file_path = os.path.join("video", f'{student_id}.avi')  # 保存到 video 文件夹
-        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
-        self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
-
-        if not self.video_writer.isOpened():
-            QMessageBox.critical(self, "Error", "Failed to create video writer")
-            return
-
-        self.timer.start(30)  # 设置定时器，每30ms更新一帧
-        self.recording = True
-        self.recording_time = 0
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setValue(0)
-        print("Recording started")
-
-        # 设置自动停止定时器
-        self.auto_stop_timer = QTimer()
-        self.auto_stop_timer.timeout.connect(self.stop_recording)
-        self.auto_stop_timer.start(self.max_recording_time)
 
     # 停止录制
     def stop_recording(self):
@@ -166,7 +175,7 @@ class UI_main(QMainWindow):
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
             qt_img = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            self.video_label.setPixmap(QPixmap.fromImage(qt_img))
+            self.ui.video_label.setPixmap(QPixmap.fromImage(qt_img))
 
             # 更新录制时间和进度条
             self.recording_time += 40  # 每次更新增加40ms
