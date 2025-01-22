@@ -14,6 +14,7 @@ import easyocr
 import numpy as np
 import matplotlib.pyplot as plt
 import video
+import re
 
 class UI_main(QMainWindow):
     def __init__(self):
@@ -23,7 +24,7 @@ class UI_main(QMainWindow):
         self.setWindowTitle("Student Face Recorder")
 
         # 设置默认学生ID
-        self.default_student_id = "100066997"
+        self.current_id = None
 
         # 隐藏存储成功提示消息
         self.hide_label_2()
@@ -61,7 +62,7 @@ class UI_main(QMainWindow):
     # 开始录制
     def start_recording(self):
         # 使用默认学生ID
-        student_id = self.default_student_id
+        # student_id = self.default_student_id
 
         # 重新点击start按钮时，隐藏Label_2
         self.hide_label_2()
@@ -78,8 +79,26 @@ class UI_main(QMainWindow):
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # 在视频采集完第一帧并识别完后
+        # 提取第10帧进行OCR识别
+        frame_count = 0
+        while frame_count < 10:
+            ret, frame = self.cap.read()
+            if not ret:
+                QMessageBox.critical(self, "Error", "Unable to capture frame")
+                return
+            frame_count += 1
+
+        # 调用OCR识别学生ID
+        student_id, annotated_frame = video.process_frame(frame)
+        if not student_id:
+            QMessageBox.critical(self, "Error", "Failed to recognize Student ID")
+            return
+        
+        print(f"Recognized Student ID: {student_id}")
+
         self.exam_student_ID(student_id)
+
+        self.current_id = self.extract_student_id(student_id)
 
         # 配置视频写入器
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -96,6 +115,7 @@ class UI_main(QMainWindow):
         self.recording_time = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
+
         print("Recording started")
 
         # 设置自动停止定时器
@@ -148,7 +168,7 @@ class UI_main(QMainWindow):
             self.progress_bar.setValue(self.max_recording_time)
 
             # 保存记录到数据库
-            student_id = self.default_student_id
+            student_id = self.current_id
             video_file_path = os.path.join("video", f'{student_id}.avi')
             self.save_to_db(student_id, video_file_path)
 
@@ -250,6 +270,41 @@ class UI_main(QMainWindow):
     def mouseReleaseEvent(self, mouse_event):
         self.m_flag = False
         self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+    
+    def extract_student_id(self, text):
+        """
+        提取连续数字作为学生ID。
+        :param text: 输入文本，例如文件名或其他字符串
+        :return: 提取到的学生ID（字符串），如果没有匹配则返回 None
+        """
+        # 正则表达式：匹配完整的连续数字（确保没有其他字符混入）
+        match = re.search(r'\b\d+\b', text)
+        return match.group(0) if match else None
+
+
+from PyQt5.QtCore import QThread, pyqtSignal
+
+class RecognitionThread(QThread):
+    recognition_done = pyqtSignal(str, np.ndarray)  # 信号：传递学生ID和标注帧
+
+    def __init__(self, cap):
+        super().__init__()
+        self.cap = cap
+
+    def run(self):
+        frame_count = 0
+        while frame_count < 10:
+            ret, frame = self.cap.read()
+            if not ret:
+                self.recognition_done.emit(None, None)
+                return
+            frame_count += 1
+
+        # 调用OCR识别学生ID
+        student_id, annotated_frame = video.process_frame(frame)
+        self.recognition_done.emit(student_id, annotated_frame)
+
+
 
 if __name__ == "__main__":
     try:
