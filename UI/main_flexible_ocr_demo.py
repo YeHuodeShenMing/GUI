@@ -26,6 +26,11 @@ class UI_main(QMainWindow):
         # 设置默认学生ID
         self.current_id = None
 
+        # 在类初始化中添加一个布尔标志变量
+        self.warning_printed = False  # 用于标记是否已打印警告
+
+        self.ui.label_2.setAlignment(Qt.AlignCenter)  # 设置内容居中
+
         # 隐藏存储成功提示消息
         self.hide_label_2()
 
@@ -67,6 +72,10 @@ class UI_main(QMainWindow):
         # 重新点击start按钮时，隐藏Label_2
         self.hide_label_2()
 
+        # 如果之前正在录制，先停止录制并清理资源
+        if self.recording:
+            self.stop_recording()
+
 
         # 初始化摄像头
         # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
@@ -79,37 +88,7 @@ class UI_main(QMainWindow):
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # 提取第10帧进行OCR识别
-        frame_count = 0
-        while frame_count < 10:
-            ret, frame = self.cap.read()
-            if not ret:
-                QMessageBox.critical(self, "Error", "Unable to capture frame")
-                return
-            frame_count += 1
-
-        # 调用OCR识别学生ID
-        student_id, annotated_frame = video.process_frame(frame)
-        if not student_id:
-            QMessageBox.critical(self, "Error", "Failed to recognize Student ID")
-            return
-        
-        print(f"Recognized Student ID: {student_id}")
-
-        self.exam_student_ID(student_id)
-
-        self.current_id = self.extract_student_id(student_id)
-
-        # 配置视频写入器
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        video_file_path = os.path.join("video", f'{student_id}.avi')  # 保存到 video 文件夹
-        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
-        self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
-
-        if not self.video_writer.isOpened():
-            QMessageBox.critical(self, "Error", "Failed to create video writer")
-            return
-
+        # 开始拍摄
         self.timer.start(30)  # 设置定时器，每30ms更新一帧
         self.recording = True
         self.recording_time = 0
@@ -117,6 +96,49 @@ class UI_main(QMainWindow):
         self.progress_bar.setValue(0)
 
         print("Recording started")
+
+        # 提取第10帧进行OCR识别
+        frame_count = 0
+        frame = None  # 初始化帧变量
+        while frame_count < 10:
+            ret, frame = self.cap.read()
+            if not ret:
+                print(f"Skipping invalid frame at position {frame_count + 1}")
+                frame_count += 1  # 避免死循环
+                continue
+            frame_count += 1
+
+        if frame is None:  # 如果没有有效帧
+            self.cap.release()
+            self.show_label_2("Unable to capture frames", color="red")
+            return
+
+
+        # 调用OCR识别学生ID
+        student_id, annotated_frame = video.process_frame(frame)
+        if not student_id:
+            self.show_label_2("Failed to recognize Student ID.\n Please try again.", color="red")
+            self.cap.release()
+            return
+        
+        print(f"Recognized Student ID: {student_id}")
+        
+        self.current_id = self.extract_student_id(student_id)
+        
+        self.exam_student_ID(self.current_id)
+
+        
+
+        # 配置视频写入器
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        video_file_path = os.path.join("video", f'{self.current_id}.avi')  # 保存到 video 文件夹
+        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
+        self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
+
+        if not self.video_writer.isOpened():
+            QMessageBox.critical(self, "Error", "Failed to create video writer")
+            return
+
 
         # 设置自动停止定时器
         self.auto_stop_timer = QTimer()
@@ -165,17 +187,20 @@ class UI_main(QMainWindow):
             self.recording = False
 
             # 确保进度条达到100%
-            self.progress_bar.setValue(self.max_recording_time)
+            # self.progress_bar.setValue(self.max_recording_time)
 
             # 保存记录到数据库
             student_id = self.current_id
-            video_file_path = os.path.join("video", f'{student_id}.avi')
-            self.save_to_db(student_id, video_file_path)
+            if student_id:
+                video_file_path = os.path.join("video", f'{student_id}.avi')
+                self.save_to_db(student_id, video_file_path)
 
-    # 更新视频帧
+
+
+    # 更新视频帧的逻辑
     def update_frame(self):
         ret, frame = self.cap.read()
-        if ret:
+        if ret and self.video_writer:
             # 写入视频文件
             self.video_writer.write(frame)
 
@@ -194,6 +219,15 @@ class UI_main(QMainWindow):
             if self.recording_time >= self.max_recording_time:
                 self.stop_recording()
 
+            # 重置标志变量，因为读取和写入正常
+            self.warning_printed = False
+        else:
+            # 仅打印一次警告信息
+            if not self.warning_printed:
+                print("Warning: Video writer is not initialized or frame capture failed.")
+                self.warning_printed = True
+
+    
     # 关闭程序
     def exit(self):
         if self.recording:

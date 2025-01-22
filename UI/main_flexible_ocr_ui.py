@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_StudentFaceRecorder(object):
     def setupUi(self, StudentFaceRecorder):
         StudentFaceRecorder.setObjectName("StudentFaceRecorder")
-        StudentFaceRecorder.resize(1038, 601)
+        StudentFaceRecorder.resize(1600, 686)
+        StudentFaceRecorder.setMinimumSize(QtCore.QSize(1600, 0))
         self.centralwidget = QtWidgets.QWidget(StudentFaceRecorder)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.centralwidget)
@@ -84,7 +85,7 @@ class Ui_StudentFaceRecorder(object):
         self.gridLayout_3.addWidget(self.frame, 1, 0, 3, 1)
         StudentFaceRecorder.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(StudentFaceRecorder)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1038, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1600, 22))
         self.menubar.setObjectName("menubar")
         StudentFaceRecorder.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(StudentFaceRecorder)
