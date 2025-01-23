@@ -187,7 +187,7 @@ class UI_main(QMainWindow):
             self.recording = False
 
             # 确保进度条达到100%
-            # self.progress_bar.setValue(self.max_recording_time)
+            self.progress_bar.setValue(self.max_recording_time)
 
             # 保存记录到数据库
             student_id = self.current_id
@@ -311,10 +311,10 @@ class UI_main(QMainWindow):
         :param text: 输入文本，例如文件名或其他字符串
         :return: 提取到的学生ID（字符串），如果没有匹配则返回 None
         """
-        # 正则表达式：匹配完整的连续数字（确保没有其他字符混入）
-        match = re.search(r'\b\d+\b', text)
-        return match.group(0) if match else None
-
+        # 正则表达式：匹配9位连续数字
+        text = text.strip()
+        matches = re.findall(r'\b\d{9}\b', text)
+        return matches[0] if matches else None
 
 from PyQt5.QtCore import QThread, pyqtSignal
 

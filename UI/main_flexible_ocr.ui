@@ -129,6 +129,9 @@ color: rgb(255, 0, 0);</string>
          </item>
          <item>
           <widget class="QLabel" name="label_2">
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
