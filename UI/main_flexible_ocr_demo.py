@@ -66,88 +66,73 @@ class UI_main(QMainWindow):
 
     # 开始录制
     def start_recording(self):
-        # 使用默认学生ID
-        # student_id = self.default_student_id
-
-        # 重新点击start按钮时，隐藏Label_2
         self.hide_label_2()
 
-        # 如果之前正在录制，先停止录制并清理资源
         if self.recording:
             self.stop_recording()
 
-
-        # 初始化摄像头
-        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
         self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             QMessageBox.critical(self, "Error", "Unable to access the camera")
             return
 
-        # 获取摄像头的分辨率
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # 开始拍摄
-        self.timer.start(30)  # 设置定时器，每30ms更新一帧
+        self.timer.start(30)
         self.recording = True
         self.recording_time = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
 
-        print("Recording started")
-
-        # 提取第10帧进行OCR识别
         frame_count = 0
-        frame = None  # 初始化帧变量
+        frame = None
         while frame_count < 10:
             ret, frame = self.cap.read()
             if not ret:
                 print(f"Skipping invalid frame at position {frame_count + 1}")
-                frame_count += 1  # 避免死循环
+                frame_count += 1
                 continue
             frame_count += 1
 
-        if frame is None:  # 如果没有有效帧
+        if frame is None:
             self.cap.release()
             self.show_label_2("Unable to capture frames", color="red")
             return
 
-
-        # 调用OCR识别学生ID
         student_id, annotated_frame = video.process_frame(frame)
         if not student_id:
             self.show_label_2("Failed to recognize Student ID.\n Please try again.", color="red")
             self.cap.release()
             return
-        
-        print(f"Recognized Student ID: {student_id}")
-        
-        self.current_id = self.extract_student_id(student_id)
-        
-        self.exam_student_ID(self.current_id)
 
-        
+        self.current_id = self.extract_student_id(student_id)
+        if not self.current_id:
+            self.show_label_2("No valid Student ID found. Please check the input.", color="red")
+            self.cap.release()
+            return
+
+        if not self.exam_student_ID(self.current_id):  # 用户选择“不覆盖”，直接返回
+            self.cap.release()
+            return
 
         # 配置视频写入器
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        video_file_path = os.path.join("video", f'{self.current_id}.avi')  # 保存到 video 文件夹
-        os.makedirs("video", exist_ok=True)  # 确保 video 文件夹存在
+        video_file_path = os.path.join("video", f'{self.current_id}.avi')
+        os.makedirs("video", exist_ok=True)
         self.video_writer = cv2.VideoWriter(video_file_path, fourcc, 20.0, (width, height))
 
         if not self.video_writer.isOpened():
             QMessageBox.critical(self, "Error", "Failed to create video writer")
             return
 
-
-        # 设置自动停止定时器
         self.auto_stop_timer = QTimer()
         self.auto_stop_timer.timeout.connect(self.stop_recording)
         self.auto_stop_timer.start(self.max_recording_time)
 
+
     # 检查Student ID 是否在库中
     def exam_student_ID(self, student_id):
-        # 检查数据库中是否已存在该学生ID的记录
         conn = sqlite3.connect("students.db")
         cursor = conn.cursor()
         cursor.execute(
@@ -169,8 +154,11 @@ class UI_main(QMainWindow):
             )
             if reply == QMessageBox.No:
                 conn.close()
-                return
+                self.current_id = None  # 清除当前ID
+                return False
         conn.close()
+        return True
+
 
     # 停止录制
     def stop_recording(self):
@@ -307,14 +295,15 @@ class UI_main(QMainWindow):
     
     def extract_student_id(self, text):
         """
-        提取连续数字作为学生ID。
-        :param text: 输入文本，例如文件名或其他字符串
-        :return: 提取到的学生ID（字符串），如果没有匹配则返回 None
+        提取可能的学生ID。允许格式为纯数字或包含字母和数字的组合。
+        :param text: 输入OCR提取的文本
+        :return: 提取的学生ID或None
         """
-        # 正则表达式：匹配9位连续数字
         text = text.strip()
-        matches = re.findall(r'\b\d{9}\b', text)
+        # 修改正则匹配：允许字母和数字组合，长度为9-12
+        matches = re.findall(r'\b[A-Za-z0-9]{9,12}\b', text)
         return matches[0] if matches else None
+
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
