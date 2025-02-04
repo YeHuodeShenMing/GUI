@@ -61,10 +61,12 @@ class UI_main(QMainWindow):
         # 初始化拖动标志
         self.m_flag = False
 
+        # 连接信号和槽
+        self.ui.checkBox.stateChanged.connect(self.on_checkbox_state_changed)
+
 
         self.show()
 
-    # 开始录制
     def start_recording(self):
         self.hide_label_2()
 
@@ -85,37 +87,58 @@ class UI_main(QMainWindow):
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
 
-        frame_count = 0
-        frame = None
-        while frame_count < 10:
-            ret, frame = self.cap.read()
-            if not ret:
-                print(f"Skipping invalid frame at position {frame_count + 1}")
+        # 每次开始录制时，重置 current_id
+        self.current_id = None
+
+        # 检查复选框是否被选中
+        if self.ui.checkBox.isChecked():
+            # 如果复选框被选中，从 QLineEdit 获取学生ID
+            self.current_id = self.ui.lineEdit.text().strip()
+
+            if not self.current_id:
+                self.show_label_2("No valid Student ID found in the input field.", color="red")
+                self.cap.release()
+                return
+            
+            
+            # 检查 Student ID 是否重复
+            if not self.exam_student_ID(self.current_id):
+                self.cap.release()
+                return
+
+        else:
+            # 如果复选框未被选中，执行 OCR 逻辑
+            frame_count = 0
+            frame = None
+            while frame_count < 10:
+                ret, frame = self.cap.read()
+                if not ret:
+                    print(f"Skipping invalid frame at position {frame_count + 1}")
+                    frame_count += 1
+                    continue
                 frame_count += 1
-                continue
-            frame_count += 1
 
-        if frame is None:
-            self.cap.release()
-            self.show_label_2("Unable to capture frames", color="red")
-            return
+            if frame is None:
+                self.cap.release()
+                self.show_label_2("Unable to capture frames", color="red")
+                return
 
-        student_id, annotated_frame = video.process_frame(frame)
-        if not student_id:
-            self.show_label_2("Failed to recognize Student ID.\n Please try again.", color="red")
-            self.cap.release()
-            return
+            student_id, annotated_frame = video.process_frame(frame)  # 假设 video.process_frame 是一个外部函数
+            if not student_id:
+                self.show_label_2("Failed to recognize Student ID.\n Please try again.", color="red")
+                self.cap.release()
+                return
 
-        self.current_id = self.extract_student_id(student_id)
-        if not self.current_id:
-            self.show_label_2("No valid Student ID found. Please check the input.", color="red")
-            self.cap.release()
-            return
+            self.current_id = self.extract_student_id(student_id)
+            if not self.current_id:
+                self.show_label_2("No valid Student ID found. Please check the input.", color="red")
+                self.cap.release()
+                return
 
-        if not self.exam_student_ID(self.current_id):  # 用户选择“不覆盖”，直接返回
-            self.cap.release()
-            return
-
+            if not self.exam_student_ID(self.current_id):  # 用户选择“不覆盖”，直接返回
+                self.cap.release()
+                return
+            
         # 配置视频写入器
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         video_file_path = os.path.join("video", f'{self.current_id}.avi')
@@ -129,7 +152,6 @@ class UI_main(QMainWindow):
         self.auto_stop_timer = QTimer()
         self.auto_stop_timer.timeout.connect(self.stop_recording)
         self.auto_stop_timer.start(self.max_recording_time)
-
 
     # 检查Student ID 是否在库中
     def exam_student_ID(self, student_id):
@@ -253,6 +275,12 @@ class UI_main(QMainWindow):
 
             print(f"Record saved: {student_id}, {file_path}, {local_time}")
             self.show_label_2("Video recording completed!")
+            
+            # 清空 QLineEdit 输入框
+            self.ui.lineEdit.clear()
+
+            # 将 QCheckBox 恢复为未选中状态
+            self.ui.checkBox.setChecked(False)
             # QMessageBox.information(self, "Success", "Record saved successfully!")
         except sqlite3.Error as e:
             self.show_label_2(f"Failed to save to database: {e}", color='red')
@@ -303,6 +331,20 @@ class UI_main(QMainWindow):
         # 修改正则匹配：允许字母和数字组合，长度为9-12
         matches = re.findall(r'\b[A-Za-z0-9]{9,12}\b', text)
         return matches[0] if matches else None
+    
+    def on_checkbox_state_changed(self, state):
+        """
+        当 QCheckBox 的状态发生变化时，调用此函数
+        """
+        if state == 2:  # Qt.Checked 的值为 2
+            student_id_input = self.ui.lineEdit
+            self.current_id = student_id_input.text().strip()
+
+            self.start_recording()
+
+        else:
+            # 当 QCheckBox 未被选中时，清空 QLineEdit 的内容
+            self.ui.lineEdit.clear()
 
 
 from PyQt5.QtCore import QThread, pyqtSignal
