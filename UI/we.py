@@ -13,7 +13,7 @@ import imutils
 import easyocr
 import numpy as np
 import matplotlib.pyplot as plt
-import video
+import utils.process_video as process_video
 import re
 
 class UI_main(QMainWindow):
@@ -114,7 +114,7 @@ class UI_main(QMainWindow):
                 self.show_label_2("Unable to capture frames", color="red")
                 return
 
-            student_id, annotated_frame = video.process_frame(frame)  # 假设 video.process_frame 是一个外部函数
+            student_id, annotated_frame = process_video.process_frame(frame)  # 假设 video.process_frame 是一个外部函数
             if not student_id:
                 self.show_label_2("Failed to recognize Student ID.\n Please try again.", color="red")
                 self.cap.release()
