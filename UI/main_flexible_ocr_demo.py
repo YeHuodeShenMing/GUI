@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QIcon
 from PyQt5.QtCore import QTimer, Qt
 import cv2
 import sys
@@ -22,6 +22,8 @@ class UI_main(QMainWindow):
         self.ui = main_flexible_ocr_ui.Ui_StudentFaceRecorder()
         self.ui.setupUi(self)
         self.setWindowTitle("Student Face Recorder")
+        # 设置窗口图标
+        self.setWindowIcon(QIcon("./cropped-logo.png"))  
 
         # 设置默认学生ID
         self.current_id = None
@@ -73,7 +75,11 @@ class UI_main(QMainWindow):
         if self.recording:
             self.stop_recording()
 
-        self.cap = cv2.VideoCapture(0)
+        # self.cap = cv2.VideoCapture(0)
+        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.185.79:554/h264Preview_01_main")
+        
+        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.186.178:554/h264Preview_02_main")
+        
         if not self.cap.isOpened():
             QMessageBox.critical(self, "Error", "Unable to access the camera")
             return
@@ -332,7 +338,7 @@ class UI_main(QMainWindow):
         matches = re.findall(r'\b[A-Za-z0-9]{9,12}\b', text)
         return matches[0] if matches else None
     
-    def on_checkbox_state_changed(self, state):
+    def on_checkbox_state_changed(self, state): 
         """
         当 QCheckBox 的状态发生变化时，调用此函数
         """

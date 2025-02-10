@@ -158,10 +158,10 @@ color: rgb(255, 0, 0);</string>
            </property>
            <property name="styleSheet">
             <string notr="true">font: 75 16pt  &quot;Bahnschrift Condensed&quot;;
-font: 18pt &quot;Times New Roman&quot;;</string>
+font: 9pt &quot;Times New Roman&quot;;</string>
            </property>
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Please remain in front of the camera for 5 seconds&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Please remain in front of the camera for 5 seconds&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -178,7 +178,7 @@ font: 18pt &quot;Times New Roman&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1600</width>
-     <height>18</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
