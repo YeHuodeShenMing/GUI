@@ -1,8 +1,5 @@
 from PyQt5.QtWidgets import *
-from datetime import datetime
-
 import numpy as np
-import matplotlib.pyplot as plt
 import utils.process_video as process_video
 
 from PyQt5.QtCore import QThread, pyqtSignal

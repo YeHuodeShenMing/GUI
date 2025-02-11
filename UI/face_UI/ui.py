@@ -43,7 +43,7 @@ class UI_main(QMainWindow):
         self.timer.timeout.connect(self.update_frame)
         self.recording = False
         self.recording_time = 0
-        self.max_recording_time = 15000  # 15秒自动停止
+        self.max_recording_time = 20000  # 15秒自动停止
         self.auto_stop_timer = None
         self.video_writer = None
 
@@ -75,10 +75,20 @@ class UI_main(QMainWindow):
         if self.recording:
             self.stop_recording()
 
+        # TODO
+
+        # laptop Carema
         self.cap = cv2.VideoCapture(0)
+
+
+        # lab C1
         # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main")
+
+        # lab C2
+        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.185.79:554/h264Preview_01_main")
         
-        # self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.186.178:554/h264Preview_02_main")
+        # classroom enrollment C1
+        self.cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.186.104:554/h264Preview_01_main")
         
         if not self.cap.isOpened():
             QMessageBox.critical(self, "Error", "Unable to access the camera")
@@ -115,7 +125,7 @@ class UI_main(QMainWindow):
 
     # 检查Student ID 是否在库中
     def exam_student_ID(self, student_id):
-        conn = sqlite3.connect("students.db")
+        conn = sqlite3.connect("enrollment.db")
         cursor = conn.cursor()
         cursor.execute(
             """
@@ -215,7 +225,7 @@ class UI_main(QMainWindow):
             local_tz = pytz.timezone('Asia/Dubai')  # 根据所在地调整时区
             local_time = datetime.now(local_tz)
 
-            conn = sqlite3.connect("students.db")
+            conn = sqlite3.connect("enrollment.db")
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -268,21 +278,21 @@ class UI_main(QMainWindow):
         self.ui.label_2.setVisible(False)
 
     # 拖动窗口
-    # def mousePressEvent(self, event):
-    #     if event.button() == QtCore.Qt.LeftButton and not self.isMaximized():
-    #         self.m_flag = True
-    #         self.m_Position = event.globalPos() - self.pos()
-    #         event.accept()
-    #         self.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton and not self.isMaximized():
+            self.m_flag = True
+            self.m_Position = event.globalPos() - self.pos()
+            event.accept()
+            self.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
 
-    # def mouseMoveEvent(self, mouse_event):
-    #     if QtCore.Qt.LeftButton and self.m_flag:
-    #         self.move(mouse_event.globalPos() - self.m_Position)
-    #         mouse_event.accept()
+    def mouseMoveEvent(self, mouse_event):
+        if QtCore.Qt.LeftButton and self.m_flag:
+            self.move(mouse_event.globalPos() - self.m_Position)
+            mouse_event.accept()
 
-    # def mouseReleaseEvent(self, mouse_event):
-    #     self.m_flag = False
-    #     self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+    def mouseReleaseEvent(self, mouse_event):
+        self.m_flag = False
+        self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
     
     def extract_student_id(self, text):
         """

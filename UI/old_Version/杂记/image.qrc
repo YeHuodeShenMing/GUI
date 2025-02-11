@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="image">
+    <file>facial_recognation.jpg</file>
+  </qresource>
+</RCC>
