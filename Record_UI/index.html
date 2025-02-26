@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Capture System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1), transparent);
+            animation: ripple 10s infinite;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dynamic-bg"></div>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8">Video Capture System</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Single Capture Card -->
+            <div class="glass-card p-6 text-center">
+                <h2 class="text-2xl font-semibold mb-4">Single Capture</h2>
+                <p class="mb-4">Capture a single video stream from your device.</p>
+                <a href="./single-capture.html" class="btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
+            </div>
+            <!-- Long Recording Card -->
+            <div class="glass-card p-6 text-center">
+                <h2 class="text-2xl font-semibold mb-4">Long Recording</h2>
+                <p class="mb-4">Record long videos with advanced controls.</p>
+                <a href="./long-recording.html" class="btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
+            </div>
+            <!-- Settings Card -->
+            <div class="glass-card p-6 text-center">
+                <h2 class="text-2xl font-semibold mb-4">Settings</h2>
+                <p class="mb-4">Configure your device and preferences.</p>
+                <a href="#" class="btn bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">Configure</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

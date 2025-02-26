@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Capture</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .breathing-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: breathe 2s infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-6 max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold mb-4">Single Capture</h1>
+            <div class="flex items-center mb-4">
+                <div class="breathing-light mr-2"></div>
+                <span>Device Connected</span>
+            </div>
+            <video id="video" autoplay class="mb-4"></video>
+            <progress id="progress" value="0" max="5000" class="w-full mb-4"></progress>
+            <div class="controls mb-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="stu_id_check" class="mr-2">
+                    <span>Input Student ID</span>
+                </label>
+                <input type="text" id="stu_id" placeholder="Enter Student ID" class="form-control mt-2 w-full p-2 bg-gray-700 rounded-lg">
+            </div>
+            <div class="controls flex space-x-4">
+                <button id="start" class="btn bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex-1">Start</button>
+                <button id="stop" class="btn bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg flex-1">Stop</button>
+                <button id="exit" class="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg flex-1">Exit</button>
+            </div>
+            <p class="mt-4 text-center">Please remain in front of the camera for 5 seconds.</p>
+        </div>
+    </div>
+</body>
+</html>
