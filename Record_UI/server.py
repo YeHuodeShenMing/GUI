@@ -8,7 +8,7 @@ import webbrowser
 import threading
 
 # 运行服务器
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, Response, request, jsonify
 app = Flask(__name__, template_folder='./frontend/templates')
 
 def start_recording(video_path, resolution="1080p"):
@@ -95,6 +95,25 @@ def long_recording():
 @app.route('/settings')
 def settings():
     return render_template('settings.html')
+
+@app.route('/save_camera_config', methods=['POST'])
+def save_camera_config():
+    data = request.json
+    conn = sqlite3.connect("settings.db")
+    cursor = conn.cursor()
+    
+    # 清空现有配置
+    cursor.execute("DELETE FROM cameras")
+    
+    # 插入新的配置
+    for config in data:
+        cursor.execute("""
+            INSERT INTO cameras (rtsp_address, channel) VALUES (?, ?)
+        """, (config['networkPath'], config['channel']))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "message": "Camera configurations saved."})
 
 
 def start_server():

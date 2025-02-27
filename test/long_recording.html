@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Recording</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .breathing-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #4caf50;
+            animation: breathing 1s infinite alternate;
+        }
+
+        @keyframes breathing {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .paused-light {
+            background-color: #fbc02d;
+            animation: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-6 max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold mb-4">Long Recording</h1>
+            <video id="video" autoplay class="mb-4 w-full h-64 md:h-96"></video>
+            <div class="controls mb-4">
+                <label class="block mb-2">Resolution:</label>
+                <select id="resolution" class="w-full p-2 bg-gray-700 rounded-lg">
+                    <option value="1080p">1080p</option>
+                    <option value="2k">2k</option>
+                </select>
+            </div>
+            <div class="controls mb-4">
+                <label class="block mb-2">Duration (minutes):</label>
+                <input type="number" id="duration" min="1" max="60" value="5" class="w-full p-2 bg-gray-700 rounded-lg">
+            </div>
+            <div class="controls flex space-x-4">
+                <button id="start"
+                    class="btn bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex-1">Start</button>
+                <button id="stop"
+                    class="btn bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg flex-1">Stop</button>
+                <button id="exit"
+                    class="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg flex-1">Exit</button>
+                <button id="finish"
+                    class="btn bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg flex-1">Finish</button>
+            </div>
+            <div class="mt-4">
+                <span class="text-xl font-semibold">Recording Time:</span>
+                <span id="timer" class="text-xl font-semibold ml-2">00:00</span>
+            </div>
+            <div class="mt-4">
+                <div class="breathing-light" id="indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let startButton = document.getElementById('start');
+        let stopButton = document.getElementById('stop');
+        let exitButton = document.getElementById('exit');
+        let finishButton = document.getElementById('finish');
+        let timerElement = document.getElementById('timer');
+        let indicator = document.getElementById('indicator');
+        let durationInput = document.getElementById('duration');
+        let resolutionSelect = document.getElementById('resolution');
+        let isRecording = false;
+        let startTime;
+        let elapsedTime = 0;
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing video stream:', error);
+            });
+
+        startButton.addEventListener('click', () => {
+            if (!isRecording) {
+                isRecording = true;
+                startTime = Date.now() - elapsedTime;
+                startTimer();
+                indicator.classList.add('breathing-light');
+                stopButton.textContent = 'Continue';
+            }
+        });
+
+        stopButton.addEventListener('click', () => {
+            if (isRecording) {
+                isRecording = false;
+                clearInterval(timerInterval);
+                elapsedTime = Date.now() - startTime;
+                indicator.classList.remove('breathing-light');
+                indicator.classList.add('paused-light');
+                stopButton.textContent = 'Continue';
+            } else {
+                isRecording = true;
+                startTimer();
+                indicator.classList.remove('paused-light');
+                indicator.classList.add('breathing-light');
+                stopButton.textContent = 'Stop';
+            }
+        });
+
+        finishButton.addEventListener('click', () => {
+            if (isRecording) {
+                clearInterval(timerInterval);
+                isRecording = false;
+                indicator.classList.remove('breathing-light');
+                indicator.classList.add('paused-light');
+                alert('Recording finished.');
+            }
+        });
+
+        exitButton.addEventListener('click', () => {
+            window.close();
+        });
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(elapsedTime / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+
+</html>
