@@ -38,24 +38,25 @@
     <div class="dynamic-bg"></div>
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center mb-8">Video Capture System</h1>
+        <div class="flex items-center mb-4">
+            <div class="breathing-light mr-2"></div>
+            <span>Device Connected</span>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Single Capture Card -->
             <div class="glass-card p-6 text-center">
                 <h2 class="text-2xl font-semibold mb-4">Single Capture</h2>
                 <p class="mb-4">Capture a single video stream from your device.</p>
-                <a href="./single-capture.html" class="btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
+                <a href="{{ url_for('single_capture') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
             </div>
-            <!-- Long Recording Card -->
             <div class="glass-card p-6 text-center">
                 <h2 class="text-2xl font-semibold mb-4">Long Recording</h2>
                 <p class="mb-4">Record long videos with advanced controls.</p>
-                <a href="./long-recording.html" class="btn bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
+                <a href="{{ url_for('long_recording') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Start</a>
             </div>
-            <!-- Settings Card -->
             <div class="glass-card p-6 text-center">
                 <h2 class="text-2xl font-semibold mb-4">Settings</h2>
                 <p class="mb-4">Configure your device and preferences.</p>
-                <a href="#" class="btn bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">Configure</a>
+                <a href="{{ url_for('settings') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">Configure</a>
             </div>
         </div>
     </div>
