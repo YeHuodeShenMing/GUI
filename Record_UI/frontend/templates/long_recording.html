@@ -28,6 +28,15 @@
             animation: breathe 2s infinite;
         }
 
+        .breathing-light-recording {
+            width: 10px;
+            height: 10px;
+            background-color: #4ade80;
+            /* 红色，表示录制状态 */
+            border-radius: 50%;
+            animation: breathe 2s infinite;
+        }
+
         @keyframes breathe {
             0% {
                 opacity: 0.3;
@@ -42,6 +51,8 @@
             background-color: #fbc02d;
             animation: none;
         }
+
+
 
         /* 添加视频容器样式 */
         #video_container {
@@ -95,9 +106,19 @@
     <div class="container mx-auto px-4 py-8">
         <div class="glass-card p-6 max-w-3xl mx-auto text-center">
             <h1 class="text-3xl font-bold mb-4">Long Recording</h1>
-            <div class="flex items-center mb-4">
-                <div class="breathing-light mr-2"></div>
-                <span>Device Connected</span>
+            <div class="flex justify-center gap-4 mb-4">
+                <!-- 原有的呼吸灯 -->
+                <div class="flex items-center">
+                    <div class="breathing-light mr-2"></div>
+                    <span>Device Connected</span>
+                </div>
+
+                <!-- 新增的呼吸灯提示“正在录制” -->
+                <div class="flex items-center">
+                    <div class="breathing-light-recording ml-4 mr-2"></div>
+                    <span>On Recording</span>
+                </div>
+
             </div>
 
             <!-- 视频容器 -->
@@ -124,7 +145,7 @@
                     class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg flex-1">Stop</button>
                 <button id="finish"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex-1">Finish</button>
-                <button id="exit"
+                <button id="exit" onclick="window.location.href='/'"
                     class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg flex-1">Exit</button>
             </div>
         </div>
@@ -149,7 +170,7 @@
             const resolution = document.getElementById("resolution").value;
             const duration = document.getElementById("duration").value;
 
-            const response = await fetch('/start_recording', {
+            const response = await fetch('/start', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -168,26 +189,47 @@
             }
         });
 
+
         document.getElementById("stop").addEventListener("click", async () => {
             if (!recording) return;
-
-            const response = await fetch('/stop_recording', {
-                method: 'POST'
-            });
-
-            const result = await response.json();
-            if (result.status === "Recording stopped") {
-                clearInterval(timer);
-                recording = false;
-                light.style.animation = "none";
-                seconds = 0;
-                timerElement.textContent = "00:00";
+            // 根据当前按钮文字决定发送暂停还是恢复指令
+            if (document.getElementById("stop").textContent.trim().toLowerCase() === "stop") {
+                const response = await fetch('/stop_recording', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "pause" })
+                });
+                const result = await response.json();
+                if (result.status === "Recording paused") {
+                    clearInterval(timer);
+                    light.style.animation = "none"; // 可设置成其他颜色表示暂停状态
+                    document.getElementById("stop").textContent = "Continue";
+                }
+            } else { // 按钮显示为 Continue 时，发送恢复指令
+                const response = await fetch('/stop_recording', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "resume" })
+                });
+                const result = await response.json();
+                if (result.status === "Recording resumed") {
+                    timer = setInterval(() => {
+                        seconds++;
+                        timerElement.textContent = new Date(seconds * 1000).toISOString().substr(14, 5);
+                    }, 1000);
+                    light.style.animation = "breathing 1.5s infinite alternate";
+                    document.getElementById("stop").textContent = "Stop";
+                }
             }
         });
 
         document.getElementById("finish").addEventListener("click", async () => {
             if (!recording) return;
-            await fetch('/stop_recording', { method: 'POST' });
+            await fetch('/stop_recording', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "finish" })
+            });
             clearInterval(timer);
             recording = false;
             light.style.animation = "none";
@@ -195,6 +237,8 @@
             timerElement.textContent = "00:00";
             alert("Recording finished!");
         });
+
+
     </script>
 </body>
 
