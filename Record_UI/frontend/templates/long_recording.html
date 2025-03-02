@@ -41,7 +41,8 @@
         #video_container {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9比例 */
+            padding-top: 56.25%;
+            /* 16:9比例 */
         }
 
         #video_feed {
@@ -86,26 +87,31 @@
     </div>
 
     <div class="container mx-auto px-4 py-8">
-        <div class="glass-card p-6 max-w-3xl mx-auto text-center">
-            <h1 class="text-3xl font-bold mb-4">Long Recording</h1>
+        <!-- 根据 cameras 数组动态生成每个摄像头的显示区 -->
+        {% for camera in cameras %}
+        <div class="glass-card p-6 max-w-3xl mx-auto text-center mb-6">
+            <h1 class="text-2xl font-bold mb-4">Camera {{ loop.index }}</h1>
             <div class="flex justify-center gap-4 mb-4">
                 <!-- Device Connected 指示灯 -->
                 <div class="flex items-center">
-                    <div id="device_light" class="breathing-light"></div>
+                    <div id="device_light_{{ loop.index }}" class="breathing-light"></div>
                     <span class="ml-2">Device Connected</span>
                 </div>
                 <!-- On Recording 指示灯 -->
                 <div class="flex items-center">
-                    <div id="recording_light" class="breathing-light-recording"></div>
+                    <div id="recording_light_{{ loop.index }}" class="breathing-light-recording"></div>
                     <span class="ml-2">On Recording</span>
                 </div>
             </div>
-
-            <!-- 视频容器 -->
-            <div id="video_container" class="mb-4">
-                <img id="video_feed" src="{{ url_for('video_feed') }}">
+            <!-- 视频容器，假设不同摄像头调用时传入 camera 参数 -->
+            <div id="video_container_{{ loop.index }}" class="mb-4">
+                <img id="video_feed_{{ loop.index }}" src="{{ url_for('video_feed', camera=loop.index) }}">
             </div>
+        </div>
+        {% endfor %}
 
+        <!-- 全局控制区域 -->
+        <div class="glass-card p-6 max-w-3xl mx-auto text-center">
             <div id="timer" class="text-xl font-semibold mb-4">00:00</div>
             <div class="controls mb-4">
                 <label class="block mb-2">Resolution:</label>
@@ -119,10 +125,14 @@
                 <input type="number" id="duration" min="1" max="60" value="5" class="w-full p-2 bg-gray-700 rounded-lg">
             </div>
             <div class="controls flex space-x-4">
-                <button id="start" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex-1">Start</button>
-                <button id="stop" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg flex-1">Stop</button>
-                <button id="finish" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex-1">Finish</button>
-                <button id="exit" onclick="window.location.href='/'" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg flex-1">Exit</button>
+                <button id="start"
+                    class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex-1">Start</button>
+                <button id="stop"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg flex-1">Stop</button>
+                <button id="finish"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex-1">Finish</button>
+                <button id="exit" onclick="window.location.href='/'"
+                    class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg flex-1">Exit</button>
             </div>
         </div>
     </div>
@@ -133,19 +143,25 @@
         let seconds = 0;
         const timerElement = document.getElementById("timer");
 
-        // 获取指示灯元素
-        const deviceLight = document.getElementById("device_light");
-        const recordingLight = document.getElementById("recording_light");
-
+        // 假设摄像头数量为 N，由模板生成时可知
+        const cameraCount = {{ cameras|length }};
+        // 存储每个摄像头对应的指示灯元素
+        const deviceLights = [];
+        const recordingLights = [];
+        for (let i = 1; i <= cameraCount; i++) {
+            deviceLights.push(document.getElementById("device_light_" + i));
+            recordingLights.push(document.getElementById("recording_light_" + i));
+        }
         // 更新设备连接状态
         // connected 为 true 时指示灯变为绿色并闪烁，false 时为红色且不闪烁
-        function updateDeviceStatus(connected) {
+        function updateDeviceStatus(index, connected) {
+            const light = deviceLights[index];
             if (connected) {
-                deviceLight.style.background = '#4ade80';
-                deviceLight.style.animation = 'breathe 1.5s infinite';
+                light.style.background = '#4ade80';
+                light.style.animation = 'breathe 1.5s infinite';
             } else {
-                deviceLight.style.background = '#ff4d4d';
-                deviceLight.style.animation = 'none';
+                light.style.background = '#ff4d4d';
+                light.style.animation = 'none';
             }
         }
 
@@ -153,18 +169,33 @@
         // idle: 未开始录制（红色，不闪烁）
         // recording: 正在录制（绿色并闪烁）
         // paused: 暂停录制（黄色，不闪烁）
-        function updateRecordingStatus(status) {
+        function updateRecordingStatus(index, status) {
+            const light = recordingLights[index];
             if (status === 'idle') {
-                recordingLight.style.background = '#ff4d4d';
-                recordingLight.style.animation = 'none';
+                light.style.background = '#ff4d4d';
+                light.style.animation = 'none';
             } else if (status === 'recording') {
-                recordingLight.style.background = '#4ade80';
-                recordingLight.style.animation = 'breathe 1.5s infinite';
+                light.style.background = '#4ade80';
+                light.style.animation = 'breathe 1.5s infinite';
             } else if (status === 'paused') {
-                recordingLight.style.background = '#fbc02d';
-                recordingLight.style.animation = 'none';
+                light.style.background = '#fbc02d';
+                light.style.animation = 'none';
             }
         }
+
+        // 更新设备连接状态 
+        function checkCameraStatus() {
+            fetch('/check_camera_status')
+                .then(response => response.json())
+                .then(data => {
+                    data.status.forEach((connected, index) => {
+                        updateDeviceStatus(index, connected);
+                    });
+                });
+        }
+        setInterval(checkCameraStatus, 3000);
+        checkCameraStatus();
+
 
         // Start 按钮：开始录制
         document.getElementById("start").addEventListener("click", async () => {
@@ -180,11 +211,13 @@
                 },
                 body: JSON.stringify({ resolution: resolution, duration: duration })
             });
-
             const result = await response.json();
             if (result.status === "Recording started") {
                 recording = true;
-                updateRecordingStatus("recording");
+                // 启动后更新每个摄像头的录制状态为 recording
+                for (let i = 0; i < cameraCount; i++) {
+                    updateRecordingStatus(i, "recording");
+                }
                 timer = setInterval(() => {
                     seconds++;
                     timerElement.textContent = new Date(seconds * 1000).toISOString().substr(14, 5);
@@ -192,12 +225,11 @@
             }
         });
 
+
         // Stop 按钮：根据当前状态进行暂停/继续切换
         document.getElementById("stop").addEventListener("click", async () => {
             if (!recording) return;
-            // 判断当前按钮文字决定发送暂停还是恢复指令
             if (document.getElementById("stop").textContent.trim().toLowerCase() === "stop") {
-                // 发送暂停指令
                 const response = await fetch('/stop_recording', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -206,11 +238,12 @@
                 const result = await response.json();
                 if (result.status === "Recording paused") {
                     clearInterval(timer);
-                    updateRecordingStatus("paused");
+                    for (let i = 0; i < cameraCount; i++) {
+                        updateRecordingStatus(i, "paused");
+                    }
                     document.getElementById("stop").textContent = "Continue";
                 }
             } else {
-                // 发送恢复指令
                 const response = await fetch('/stop_recording', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -222,7 +255,9 @@
                         seconds++;
                         timerElement.textContent = new Date(seconds * 1000).toISOString().substr(14, 5);
                     }, 1000);
-                    updateRecordingStatus("recording");
+                    for (let i = 0; i < cameraCount; i++) {
+                        updateRecordingStatus(i, "recording");
+                    }
                     document.getElementById("stop").textContent = "Stop";
                 }
             }
@@ -238,14 +273,13 @@
             });
             clearInterval(timer);
             recording = false;
-            updateRecordingStatus("idle");
+            for (let i = 0; i < cameraCount; i++) {
+                updateRecordingStatus(i, "idle");
+            }
             seconds = 0;
             timerElement.textContent = "00:00";
             alert("Recording finished!");
         });
-
-        // 模拟设备连接状态 (此处逻辑仅用于演示，实际应用中请替换为正确的连接状态检测)
-        setTimeout(() => updateDeviceStatus(true), 2000); // 假设2秒后设备连接成功
     </script>
 </body>
 

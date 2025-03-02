@@ -84,6 +84,24 @@
             height: 20px;
             fill: #ffffff;
         }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 
@@ -127,8 +145,11 @@
                 </div>
             </form>
         </div>
-        <div id="configStatus" class="bg-gray-800 text-white p-4 rounded-lg mt-4">
-            Here is the configuration
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-3xl font-bold text-center mb-8">Camera Configurations</h1>
+            <div id="configStatus">
+                <!-- 摄像头配置将动态插入到这里 -->
+            </div>
         </div>
 
     </div>
@@ -158,7 +179,7 @@
                 rstpDiv.className = 'w-full md:w-1/2';
                 rstpDiv.innerHTML = `
                     <label class="block text-sm font-medium mb-2">Camera ${i + 1} - Rstp Address</label>
-                    <input type="text" name="rstpAddress${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white" placeholder="e.g., rtsp://192.168.1.100:554">
+                    <input type="text" name="rstpAddress${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white" placeholder="e.g., rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main">
                 `;
 
                 // Channel 下拉菜单
@@ -187,14 +208,34 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        document.getElementById('configStatus').innerText = "Currenr Configuration: " + JSON.stringify(data.data, null, 2);
+                        const configStatus = document.getElementById('configStatus');
+                        configStatus.innerHTML = ''; // 清空内容
+
+                        data.data.cameras.forEach((camera, index) => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+
+                            const title = document.createElement('h2');
+                            title.textContent = `Camera ${index + 1}`;
+                            card.appendChild(title);
+
+                            const rstpAddress = document.createElement('p');
+                            rstpAddress.innerHTML = `<strong>RTSP Address:</strong> ${camera.rstpAddress || 'N/A'}`;
+                            card.appendChild(rstpAddress);
+
+                            const channel = document.createElement('p');
+                            channel.innerHTML = `<strong>Channel:</strong> ${camera.channel || 'N/A'}`;
+                            card.appendChild(channel);
+
+                            configStatus.appendChild(card);
+                        });
                     } else {
-                        document.getElementById('configStatus').innerText = "Can't Inquiry Currenr Configuration.";
+                        document.getElementById('configStatus').innerText = "Unable to retrieve current configuration.";
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('configStatus').innerText = "获取配置时发生错误。";
+                    document.getElementById('configStatus').innerText = "An error occurred while fetching the configuration.";
                 });
         });
 
