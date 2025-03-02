@@ -18,33 +18,23 @@ recording_control = {
     "stop_event": threading.Event()
 }
 
-def get_video_capture(resolution="1080p"):
-    resolutions = {"1080p": (1920, 1080), "2k": (2560, 1440)}
-    width, height = resolutions.get(resolution, (1920, 1080))
-    cap = cv2.VideoCapture("rtsp://admin:Xray@12345;@10.10.185.191:554/h264Preview_01_main")
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    return cap
+# 全局字典用于存储摄像头配置以及录制信息
+global_config = {
+    "cameras": [{
+                "channel": 1,
+                "rstpAddress": "rstp://10.10.176.19:554"
+                }, 
+                {
+                "channel": 1,
+                "rstpAddress": "rstp://10.10.185.191:556"
+                }, 
+                {
+                    
+                 }],  
+        # 用于存储最多三个摄像头的配置
+        # "recordings": []          # 用于存储录像记录
+}
 
-def play_video_stream(resolution="1080p"):
-    """
-    单独实现视频流播放，不进行录制，
-    在未点击 start 之前可调用此函数进行预览。
-    """
-    cap = get_video_capture(resolution)
-    if not cap.isOpened():
-        print("无法打开视频流！")
-        return
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        cv2.imshow("Video Preview", frame)
-        # 按 'q' 键退出预览
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    cap.release()
-    cv2.destroyAllWindows()
 
 def start_recording(video_path, resolution="1080p"):
     recording_control["recording"] = True
@@ -174,25 +164,36 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-
+# 将摄像头配置写入全局字典
 @app.route('/save_camera_config', methods=['POST'])
 def save_camera_config():
-    data = request.json
-    conn = sqlite3.connect("settings.db")
-    cursor = conn.cursor()
+    data = request.json  # 期望 data 为一个列表，顺序依次对应 Camera1, Camera2, Camera3
+    print("Received camera config data:", data)
     
-    # 清空现有配置
-    cursor.execute("DELETE FROM cameras")
+    # 确保 global_config["cameras"] 至少有 3 个槽位，若不足则补充空字典
+    if len(global_config["cameras"]) < 3:
+        global_config["cameras"].extend([{} for _ in range(3 - len(global_config["cameras"]))])
     
-    # 插入新的配置
-    for config in data:
-        cursor.execute("""
-            INSERT INTO cameras (rtsp_address, channel) VALUES (?, ?)
-        """, (config['networkPath'], config['channel']))
+    # 根据传入数据更新对应槽位，不清空其他槽位
+    for i, config in enumerate(data):
+        if i < 3:
+            global_config["cameras"][i] = config
+
+    print("Updated global camera configuration:", global_config["cameras"])
+    return jsonify({
+        "status": "success",
+        "message": "Camera configurations updated in global dictionary.",
+        "data": global_config
+    })
     
-    conn.commit()
-    conn.close()
-    return jsonify({"status": "success", "message": "Camera configurations saved."})
+# 常态化显示config
+@app.route('/get_camera_config', methods=['GET'])
+def get_camera_config():
+    return jsonify({
+        "status": "success",
+        "data": global_config
+    })
+
 
 
 def start_server():

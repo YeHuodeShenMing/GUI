@@ -89,7 +89,6 @@
 
 <body>
     <div class="dynamic-bg"></div>
-
     <!-- 返回主页的图标 -->
     <div class="back-home" onclick="window.location.href='/'">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -101,8 +100,8 @@
 
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-center mb-8">Settings</h1>
-
         <div class="glass-card p-6 max-w-2xl mx-auto">
+            <!-- 将 Confirm 按钮移入 form 内 -->
             <form id="cameraConfigForm">
                 <div class="space-y-6">
                     <div>
@@ -113,100 +112,126 @@
                             <option value="3">3</option>
                         </select>
                     </div>
-
                     <div id="cameraConfigurations"></div>
                 </div>
+                <!-- 按钮区 -->
+                <div class="mt-8 flex justify-end gap-4">
+                    <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg"
+                        onclick="window.location.href='/'">
+                        Cancel
+                    </button>
+                    <button id="confirmButton" type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg w-full">
+                        Confirm
+                    </button>
+                </div>
             </form>
-            <!-- Confirm Button -->
-             <!-- 这个button和其他div的间距在哪里修改 -->
-              <div class="space-y-6"></div>
-            <div class="mt-8 flex justify-end gap-4">
-                <button class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
-                    Cancel
-                </button>
-                <button id="confirmButton" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg w-full">
-                    Confirm
-                </button>
-            </div>
         </div>
+        <div id="configStatus" class="bg-gray-800 text-white p-4 rounded-lg mt-4">
+            Here is the configuration
+        </div>
+
     </div>
 
     <script>
         const cameraCountSelect = document.getElementById('cameraCount');
         const configContainer = document.getElementById('cameraConfigurations');
 
-        // Add event listener for camera count change
+        // 监听摄像头数量选择变化
         cameraCountSelect.addEventListener('change', updateCameraConfigurations);
 
-        // Initial setup with default value (1 camera)
+        // 默认初始化 1 个摄像头配置
         updateCameraConfigurations();
 
-        // Function to generate camera configuration rows
+
+        // 动态生成摄像头配置行
         function updateCameraConfigurations() {
             const count = parseInt(cameraCountSelect.value);
             configContainer.innerHTML = '';
 
             for (let i = 0; i < count; i++) {
                 const row = document.createElement('div');
-                row.className = 'flex flex-wrap gap-4 config-row';
+                row.className = 'flex flex-col md:flex-row gap-6 mb-6 config-row';
 
-                row.innerHTML = `
-                    <div class="w-full md:w-1/2">
-                        <label class="block text-sm font-medium mb-2">Camera ${i + 1} - Network Path</label>
-                        <input type="text" name="networkPath${i}"
-                               class="w-full bg-gray-800 rounded-lg p-3 text-white"
-                               placeholder="e.g., rtsp://192.168.1.100:554">
-                    </div>
-
-                    <div class="w-full md:w-1/2">
-                        <label class="block text-sm font-medium mb-2">Channel</label>
-                        <select name="channel${i}"
-                                class="w-full bg-gray-800 rounded-lg p-3 text-white">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                        </select>
-                    </div>
+                // Rstp Address 输入框
+                const rstpDiv = document.createElement('div');
+                rstpDiv.className = 'w-full md:w-1/2';
+                rstpDiv.innerHTML = `
+                    <label class="block text-sm font-medium mb-2">Camera ${i + 1} - Rstp Address</label>
+                    <input type="text" name="rstpAddress${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white" placeholder="e.g., rtsp://192.168.1.100:554">
                 `;
 
+                // Channel 下拉菜单
+                const channelDiv = document.createElement('div');
+                channelDiv.className = 'w-full md:w-1/2';
+                channelDiv.innerHTML = `
+                    <label class="block text-sm font-medium mb-2">Camera ${i + 1} - Channel</label>
+                    <select name="channel${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                `;
+
+                row.appendChild(rstpDiv);
+                row.appendChild(channelDiv);
                 configContainer.appendChild(row);
             }
         }
 
-        // Handle form submission
+        // 常态显示config
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/get_camera_config', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('configStatus').innerText = "Currenr Configuration: " + JSON.stringify(data.data, null, 2);
+                    } else {
+                        document.getElementById('configStatus').innerText = "Can't Inquiry Currenr Configuration.";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('configStatus').innerText = "获取配置时发生错误。";
+                });
+        });
+
+
+
+        // 处理表单提交
         document.getElementById('cameraConfigForm').addEventListener('submit', function (e) {
             e.preventDefault();
-
             const formData = new FormData(this);
             let configuration = [];
 
             for (let i = 0; i < cameraCountSelect.value; i++) {
                 configuration.push({
-                    networkPath: formData.get(`networkPath${i}`),
+                    rstpAddress: formData.get(`rstpAddress${i}`),
                     channel: parseInt(formData.get(`channel${i}`))
                 });
             }
 
-            // Here you would typically send the configuration to your backend
-            console.log('Camera Configuration:', configuration);
-
-            // Send configuration to backend
             fetch('/save_camera_config', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(configuration)
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.status === 'success') {
-                      alert('Camera configurations saved successfully!');
-                  } else {
-                      alert('Failed to save configurations.');
-                  }
-              }).catch(error => {
-                  console.error('Error:', error);
-                  alert('Error occurred while saving configurations.');
-              });
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Camera configurations saved successfully:\n' + JSON.stringify(data.data, null, 2));
+                        // console
+                        document.getElementById('configStatus').innerText = "当前配置: " + JSON.stringify(data.data, null, 2);
+                    } else {
+                        alert('Failed to save configurations.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error occurred while saving configurations.');
+                });
         });
     </script>
 </body>
