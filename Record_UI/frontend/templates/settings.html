@@ -179,7 +179,7 @@
                 rstpDiv.className = 'w-full md:w-1/2';
                 rstpDiv.innerHTML = `
                     <label class="block text-sm font-medium mb-2">Camera ${i + 1} - Rstp Address</label>
-                    <input type="text" name="rstpAddress${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white" placeholder="e.g., rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main">
+                    <input type="text" name="rtspAddress${i}" class="w-full bg-gray-800 rounded-lg p-3 text-white" placeholder="e.g., rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main">
                 `;
 
                 // Channel 下拉菜单
@@ -219,9 +219,9 @@
                             title.textContent = `Camera ${index + 1}`;
                             card.appendChild(title);
 
-                            const rstpAddress = document.createElement('p');
-                            rstpAddress.innerHTML = `<strong>RTSP Address:</strong> ${camera.rstpAddress || 'N/A'}`;
-                            card.appendChild(rstpAddress);
+                            const rtspAddress = document.createElement('p');
+                            rtspAddress.innerHTML = `<strong>RTSP Address:</strong> ${camera.rtspAddress || 'N/A'}`;
+                            card.appendChild(rtspAddress);
 
                             const channel = document.createElement('p');
                             channel.innerHTML = `<strong>Channel:</strong> ${camera.channel || 'N/A'}`;
@@ -249,7 +249,7 @@
 
             for (let i = 0; i < cameraCountSelect.value; i++) {
                 configuration.push({
-                    rstpAddress: formData.get(`rstpAddress${i}`),
+                    rtspAddress: formData.get(`rtspAddress${i}`),
                     channel: parseInt(formData.get(`channel${i}`))
                 });
             }

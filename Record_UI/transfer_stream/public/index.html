@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <script src="https://jsmpeg.com/jsmpeg.min.js" charset="utf-8"></script>
+  <title>播放rtsp</title>
+</head>
+<body>
+  <canvas id="canvas-1" style="width: 600px;"></canvas>
+
+  <script>
+    var rtsp = 'rtsp://admin:Xray@12345;@10.10.176.19:554/h264Preview_01_main';
+    window.onload = () => {
+      // 将rtsp视频流地址进行btoa处理一下
+      new JSMpeg.Player('ws://localhost:9999/rtsp?url=' + btoa(rtsp), {
+        canvas: document.getElementById('canvas-1')
+      });
+    }
+  </script>
+</body>
+</html>
