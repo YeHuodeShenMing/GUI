@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>100</x>
+    <y>100</y>
+    <width>960</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Multi Camera Recording</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
+    <!-- 视频显示区域 -->
+    <item>
+     <widget class="QWidget" name="widget_video">
+      <layout class="QHBoxLayout" name="horizontalLayout_video">
+       <!-- 摄像头1 -->
+       <item>
+        <widget class="QWidget" name="camera1Widget">
+         <layout class="QVBoxLayout" name="verticalLayout_cam1">
+          <!-- 视频显示 -->
+          <item>
+           <widget class="QLabel" name="label_camera1">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="text">
+             <string>Camera 1</string>
+            </property>
+           </widget>
+          </item>
+          <!-- PTZ控制区域 -->
+          <item>
+           <widget class="QGroupBox" name="groupBox_ptz1">
+            <property name="title">
+             <string>PTZ Control</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_ptz1">
+             <!-- 方向控制按钮 -->
+             <item>
+              <widget class="QWidget" name="widget_direction1">
+               <layout class="QGridLayout" name="gridLayout_direction1">
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="pushButton_up1">
+                  <property name="text">
+                   <string>Up</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="pushButton_left1">
+                  <property name="text">
+                   <string>Left</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QPushButton" name="pushButton_right1">
+                  <property name="text">
+                   <string>Right</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="pushButton_down1">
+                  <property name="text">
+                   <string>Down</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <!-- 缩放滑块 -->
+             <item>
+              <widget class="QSlider" name="slider_zoom1">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <!-- 指示灯区域 -->
+          <item>
+           <layout class="QHBoxLayout" name="layout_indicator1">
+            <item>
+             <widget class="QLabel" name="label_device1">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_device1">
+              <property name="text">
+               <string>Device Connected</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer1">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_recording1">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_recording1">
+              <property name="text">
+               <string>On Recording</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <!-- 摄像头2 -->
+       <item>
+        <widget class="QWidget" name="camera2Widget">
+         <layout class="QVBoxLayout" name="verticalLayout_cam2">
+          <!-- 视频显示 -->
+          <item>
+           <widget class="QLabel" name="label_camera2">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="text">
+             <string>Camera 2</string>
+            </property>
+           </widget>
+          </item>
+          <!-- PTZ控制区域 -->
+          <item>
+           <widget class="QGroupBox" name="groupBox_ptz2">
+            <property name="title">
+             <string>PTZ Control</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_ptz2">
+             <item>
+              <widget class="QWidget" name="widget_direction2">
+               <layout class="QGridLayout" name="gridLayout_direction2">
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="pushButton_up2">
+                  <property name="text">
+                   <string>Up</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="pushButton_left2">
+                  <property name="text">
+                   <string>Left</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QPushButton" name="pushButton_right2">
+                  <property name="text">
+                   <string>Right</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="pushButton_down2">
+                  <property name="text">
+                   <string>Down</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="slider_zoom2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <!-- 指示灯区域 -->
+          <item>
+           <layout class="QHBoxLayout" name="layout_indicator2">
+            <item>
+             <widget class="QLabel" name="label_device2">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_device2">
+              <property name="text">
+               <string>Device Connected</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_recording2">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_recording2">
+              <property name="text">
+               <string>On Recording</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <!-- 摄像头3 -->
+       <item>
+        <widget class="QWidget" name="camera3Widget">
+         <layout class="QVBoxLayout" name="verticalLayout_cam3">
+          <!-- 视频显示 -->
+          <item>
+           <widget class="QLabel" name="label_camera3">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="text">
+             <string>Camera 3</string>
+            </property>
+           </widget>
+          </item>
+          <!-- PTZ控制区域 -->
+          <item>
+           <widget class="QGroupBox" name="groupBox_ptz3">
+            <property name="title">
+             <string>PTZ Control</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_ptz3">
+             <item>
+              <widget class="QWidget" name="widget_direction3">
+               <layout class="QGridLayout" name="gridLayout_direction3">
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="pushButton_up3">
+                  <property name="text">
+                   <string>Up</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="pushButton_left3">
+                  <property name="text">
+                   <string>Left</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QPushButton" name="pushButton_right3">
+                  <property name="text">
+                   <string>Right</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="pushButton_down3">
+                  <property name="text">
+                   <string>Down</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="slider_zoom3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <!-- 指示灯区域 -->
+          <item>
+           <layout class="QHBoxLayout" name="layout_indicator3">
+            <item>
+             <widget class="QLabel" name="label_device3">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_device3">
+              <property name="text">
+               <string>Device Connected</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_recording3">
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>15</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: red; border-radius:50%;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="text_recording3">
+              <property name="text">
+               <string>On Recording</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <!-- 控制区域（全局控制，比如计时器和分辨率设置） -->
+    <item>
+     <widget class="QWidget" name="widget_control">
+      <layout class="QVBoxLayout" name="verticalLayout_control">
+       <item>
+        <widget class="QLabel" name="label_timer">
+         <property name="text">
+          <string>00:00</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_settings">
+         <item>
+          <widget class="QLabel" name="label_resolution">
+           <property name="text">
+            <string>Resolution:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_resolution">
+           <item>
+            <property name="text">
+             <string>1080p</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>2k</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_duration">
+           <property name="text">
+            <string>Duration (min):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox_duration">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>60</number>
+           </property>
+           <property name="value">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_buttons">
+         <item>
+          <widget class="QPushButton" name="pushButton_start">
+           <property name="text">
+            <string>Start</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_stop">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_finish">
+           <property name="text">
+            <string>Finish</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_exit">
+           <property name="text">
+            <string>Exit</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

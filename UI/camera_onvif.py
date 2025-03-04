@@ -2,7 +2,7 @@ from onvif import ONVIFCamera
 
 import time
 
-camera_ip = "10.10.176.19" # cam3: "10.10.176.17"
+camera_ip = "10.10.176.19" # cam3: "10.10.176.17" # cam2 "10.10.185.191" # cam1 "10.10.176.19"
 onvif_port = 8000
 username = "admin"
 password = "Xray@12345;"
